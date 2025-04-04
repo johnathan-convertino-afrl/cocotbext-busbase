@@ -214,8 +214,9 @@ class busbase:
             while self.read_empty():
                 self._idle_read.clear()
                 await self._idle_read.wait()
-                self.log.info(f'{self.__class__.__name__} on bus prefix {self.name} : transaction = <{', '.join(f'{str(key)} : {str(int(value))}' for key, value in vars(trans).items())}>')
-            return await self.rqueue.get()
+            temp = await self.rqueue.get()
+            self.log.info(f'{self.__class__.__name__} on bus prefix {self.name} : transaction = <{', '.join(f'{str(key)} : {str(int(value))}' for key, value in vars(temp).items())}>')
+            return temp
 
     # Function: _check_type
     # Check and make sure we are only sending the correct transaction type
