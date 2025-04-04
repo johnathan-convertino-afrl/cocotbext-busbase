@@ -199,7 +199,7 @@ class busbase:
             await self.wqueue.put(trans)
             self._idle_write.clear()
             await self._idle_write.wait()
-            self.log.info(f'{self.__class__.__name__} on bus prefix {self.name} : write transaction = <{', '.join(f'{str(key)} : {hex(int(value))}' for key, value in vars(trans).items())}>')
+            self.log.info(f'{self.__class__.__name__:<24} : bus prefix {self.name:<8} : write transaction = <{', '.join(f'{str(key)} : {hex(int(value))}' for key, value in vars(trans).items())}>')
 
     # Function: _queue_read
     # Setup queue for read requests
@@ -215,7 +215,7 @@ class busbase:
                 self._idle_read.clear()
                 await self._idle_read.wait()
             temp = await self.rqueue.get()
-            self.log.info(f'{self.__class__.__name__} on bus prefix {self.name} :  read transaction = <{', '.join(f'{str(key)} : {hex(int(value))}' for key, value in vars(temp).items())}>')
+            self.log.info(f'{self.__class__.__name__:<24} : bus prefix {self.name:<8} :  read transaction = <{', '.join(f'{str(key)} : {hex(int(value))}' for key, value in vars(temp).items())}>')
             return temp
 
     # Function: _check_type
