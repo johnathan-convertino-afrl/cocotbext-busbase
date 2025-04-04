@@ -26,7 +26,7 @@
   For detailed usage information, please navigate to one of the following sources. They are the same, just in a different format.
 
   - [cocotbext_busbase.pdf](docs/manual/cocotbext_busbase.pdf)
-  - [github page](https://johnathan-convertino-afrl.github.io/cocotbext-up/)
+  - [github page](https://johnathan-convertino-afrl.github.io/cocotbext-busbase/)
 
 ### DEPENDENCIES
 #### Build
