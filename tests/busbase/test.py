@@ -188,7 +188,7 @@ class basicMaster(busbase):
 
 # Class: basicEchoSlave
 # Respond to master reads and write by returning data, simple echo core.
-class basicpEchoSlave(busbase):
+class basicEchoSlave(busbase):
   # Variable: _signals
   # List of signals that are required
   _signals = ["addr", "we", "cs", "data"]
@@ -236,8 +236,10 @@ class basicpEchoSlave(busbase):
         if self.bus.we.value:
           await FallingEdge(self.clock)
           self._registers[self.bus.addr.value.integer] = self.bus.data.value.integer
+          self.log.info(f'BASIC BUS WRITE {hex(self.bus.data.value.integer)}')
         else:
           self.bus.data.value = self._registers[self.bus.addr.value.integer]
+          self.log.info(f'BASIC BUS READ {hex(self._registers[self.bus.addr.value.integer])}')
 
         self.acitve = True
       else:
@@ -256,7 +258,7 @@ class TB:
         cocotb.start_soon(Clock(dut.clk, 2, units="ns").start())
 
         self.master  = basicMaster(dut, "b", dut.clk, dut.rst)
-        self.slave = basicpEchoSlave(dut, "b", dut.clk, dut.rst)
+        self.slave = basicEchoSlave(dut, "b", dut.clk, dut.rst)
 
     async def reset(self):
         self.dut.rst.setimmediatevalue(1)
