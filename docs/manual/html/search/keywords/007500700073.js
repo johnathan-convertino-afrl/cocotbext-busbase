@@ -1,1 +1,0 @@
-﻿NDSearch.OnPrefixDataLoaded("ups",["Class"],[["upState",,[[,,,,0,"File:absbus.py:upState","PythonClass:upState"]]]]);

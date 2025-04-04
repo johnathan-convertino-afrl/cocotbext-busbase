@@ -1,0 +1,1 @@
+﻿NDContentPage.OnToolTipsLoaded({50:"<div class=\"NDToolTip TClass LPython\"><div class=\"NDClassPrototype\" id=\"NDClassPrototype50\"><div class=\"CPEntry TClass Current\"><div class=\"CPName\">busbase</div></div></div><div class=\"TTSummary\">A busbase to transmit test routine.</div></div>"});

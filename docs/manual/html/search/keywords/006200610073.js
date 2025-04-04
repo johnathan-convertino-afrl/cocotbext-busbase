@@ -1,0 +1,1 @@
+﻿NDSearch.OnPrefixDataLoaded("bas",["Class"],[["basicEchoSlave",,[[,,,,0,"File2:test.py:basicEchoSlave","PythonClass:basicEchoSlave"]]],["basicMaster",,[[,,,,0,"File2:test.py:basicMaster","PythonClass:basicMaster"]]],["basictrans",,[[,,,,0,"File2:test.py:basictrans","PythonClass:basictrans"]]]]);

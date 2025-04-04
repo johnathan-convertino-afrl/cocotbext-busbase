@@ -1,1 +1,1 @@
-﻿NDSearch.OnPrefixDataLoaded("wai",["Function"],[["wait",,[["busbase",,,,0,"File3:busbase.py:busbase.wait","PythonClass:busbase:wait"]]]]);
+﻿NDSearch.OnPrefixDataLoaded("wai",["Function"],[["wait_read",,[["busbase",,,,0,"File:busbase.py:busbase.wait_read","PythonClass:busbase:wait_read"]]],["wait_write",,[["busbase",,,,0,"File:busbase.py:busbase.wait_write","PythonClass:busbase:wait_write"]]]]);

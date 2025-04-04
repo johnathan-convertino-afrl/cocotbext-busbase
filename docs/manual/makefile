@@ -1,4 +1,4 @@
-PROJECT_NAME := cocotbext_up
+PROJECT_NAME := cocotbext_busbase
 
 MK_DIR := makefiles
 

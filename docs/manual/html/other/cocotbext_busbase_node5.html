@@ -1,0 +1,171 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2024 (Released January 1, 2024) -->
+<HTML lang="en">
+<HEAD>
+<TITLE>In a Simulation</TITLE>
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2024">
+
+<LINK REL="STYLESHEET" HREF="html.css">
+
+<LINK REL="previous" HREF="cocotbext_busbase_node4.html">
+<LINK REL="next" HREF="cocotbext_busbase_node6.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="cocotbext_busbase_node6.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="cocotbext_busbase_node2.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="cocotbext_busbase_node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A> 
+<A ID="tex2html40"
+  HREF="cocotbext_busbase_node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A
+ HREF="cocotbext_busbase_node6.html">Architecture</A>
+<B> Up:</B> <A
+ HREF="cocotbext_busbase_node2.html">Usage</A>
+<B> Previous:</B> <A
+ HREF="cocotbext_busbase_node4.html">Dependencies</A>
+ &nbsp; <B>  <A ID="tex2html41"
+  HREF="cocotbext_busbase_node1.html">Contents</A></B> 
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H2><A ID="SECTION00023000000000000000">
+In a Simulation</A>
+</H2>
+
+<P>
+Below is a simple example of creating a basic master for a bus using busmaster (see test.py for usable example).
+<TABLE FRAME="VOID" CELLPADDING="4"><TR><TD>
+<PRE>
+# Class: basictrans
+# create an object that associates a data member and address for operation.
+class basictrans(transaction):
+    def __init__(self, address, data=None):
+        self.address = address
+        self.data = data
+
+# Class: basicMaster
+# basic bus master
+class basicMaster(busbase):
+  # Variable: _signals
+  # List of signals that are required
+  _signals = ["addr", "we", "cs", "data"]
+
+  # Constructor: __init__
+  # Setup defaults and call base class constructor.
+  def __init__(self, entity, name, clock, reset, *args, **kwargs):
+    super().__init__(entity, name, clock, *args, **kwargs)
+
+    self.log.info("BASIC Master")
+    self.log.info("Copyright (c) 2025 Jay Convertino")
+    self.log.info("https://github.com/johnathan-convertino-afrl/cocotbext-busbase")
+
+    self._reset = reset
+
+    self.bus.addr.setimmediatevalue(0)
+    self.bus.data.setimmediatevalue(0)
+
+  # Function: read
+  # Read from a address and return data
+  async def read(self, address):
+    trans = None
+    if(isinstance(address, list)):
+      temp = []
+      for a in address:
+        temp.append(basictrans(a))
+      temp = await self.read_trans(temp)
+      #need a return with the data list only. This is only a guess at this point
+      return [temp[i].data for i in range(len(temp))]
+    else:
+      trans = await self.read_trans(basictrans(address))
+      return trans.data
+
+  # Function: write
+  # Write to a address some data
+  async def write(self, address, data):
+    if(isinstance(address, list) or isinstance(data, list)):
+      if(len(address) != len(data)):
+        self.log.error(f'Address and data vector must be the same length')
+      temp = []
+      for i in range(len(address)):
+        temp.append(basictrans(address[i], data[i]))
+      await self.write_trans(temp)
+    else:
+      await self.write_trans(basictrans(address, data))
+
+  # Function: _check_type
+  # Check and make sure we are only sending 2 bytes at a time and that it is a bytes/bytearray
+  def _check_type(self, trans):
+      if(not isinstance(trans, basictrans)):
+          self.log.error(f'Transaction must be of type: {type(basictrans)}')
+          return False
+
+      return True
+
+  # Method: _run
+  # _run thread that deals with read and write.
+  async def _run(self):
+    self.active = False
+
+    trans = None
+
+    while True:
+
+      if self._reset.value:
+        self.bus.we.setimmediatevalue(0)
+        self.bus.cs.setimmediatevalue(0)
+        await RisingEdge(self.clock)
+        continue
+
+      if not self.wqueue.empty():
+        self.active = True
+        while self.active:
+          trans = await self.wqueue.get()
+          self.bus.we.setimmediatevalue(1)
+          self.bus.cs.setimmediatevalue(1)
+          self.bus.addr.setimmediatevalue(trans.address)
+          self.bus.data.setimmediatevalue(trans.data)
+          self._idle_write.set()
+          await RisingEdge(self.clock)
+
+          self.active = not self.wqueue.empty()
+      elif not self.qqueue.empty():
+        self.active = True
+        while self.active:
+          trans = await self.qqueue.get()
+          self.bus.we.setimmediatevalue(0)
+          self.bus.cs.setimmediatevalue(1)
+          self.bus.addr.setimmediatevalue(trans.address)
+          trans.data = self.bus.data.value
+          await self.rqueue.put(trans)
+          self._idle_read.set()
+          await RisingEdge(self.clock)
+
+          self.active = not self.qqueue.empty()
+      else:
+        self.active = False
+        self.bus.we.setimmediatevalue(0)
+        self.bus.cs.setimmediatevalue(0)
+        await RisingEdge(self.clock)
+</PRE>
+</TD></TR></TABLE>
+
+<P>
+<BR><HR>
+
+</BODY>
+</HTML>

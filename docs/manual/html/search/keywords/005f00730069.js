@@ -1,1 +1,1 @@
-﻿NDSearch.OnPrefixDataLoaded("_si",["Variable"],[["_signals",,[["upBase",,,,0,"File:absbus.py:upBase._signals","PythonClass:upBase:_signals"]]]]);
+﻿NDSearch.OnPrefixDataLoaded("_si",["Variable"],[["_signals",,[["basicEchoSlave",,,,0,"File2:test.py:basicEchoSlave._signals","PythonClass:basicEchoSlave:_signals"],["basicMaster",,,,0,"File2:test.py:basicMaster._signals","PythonClass:basicMaster:_signals"]]]]);

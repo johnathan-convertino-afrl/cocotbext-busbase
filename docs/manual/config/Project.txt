@@ -80,14 +80,11 @@ Home Page: ../html/other/html.html
 # Source Code
 # ------------------------------------------------------------------------
 
-Source Folder: ../../../cocotbext/up/ad
-   Name: cocotbext-up-ad
+Source Folder: ../../../cocotbext/busbase
+   Name: cocotbext-busbase
 
-Source Folder 2: ../../../tests/up_ad
-   Name: cocotbext-up-ad-tests
-
-Source Folder 3: ../../../cocotbext/up
-   Name: cocotbext-up
+Source Folder 2: ../../../tests/busbase
+   Name: cocotbext-busbase-tests
 
 
 # This is where you tell Natural Docs which folders it should scan for source

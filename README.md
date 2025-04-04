@@ -1,5 +1,5 @@
-# Cocotbext for uP Bus
-### Provides monitor and driver.
+# Cocotbext BUS Base
+### Provides base of methods for bus extensions
 
 ![image](docs/manual/img/AFRL.png)
 
@@ -25,7 +25,7 @@
 ### DOCUMENTATION
   For detailed usage information, please navigate to one of the following sources. They are the same, just in a different format.
 
-  - [cocotbext_up.pdf](docs/manual/cocotbext_up.pdf)
+  - [cocotbext_busbase.pdf](docs/manual/cocotbext_busbase.pdf)
   - [github page](https://johnathan-convertino-afrl.github.io/cocotbext-up/)
 
 ### DEPENDENCIES
@@ -40,18 +40,14 @@
 
 ```bash
 ├── cocotbext
-│   └── up
+│   └── busbase
 │       ├── busbase.py
-│       ├── ad
-│       │   ├── absbus.py
-│       │   ├── driver.py
-│       │   ├── __init__.py
-│       │   └── monitor.py
+│       ├── __init__.py
 │       └── version.py
 ├── docs
 │   ├── index.html
 │   └── manual
-│       ├── cocotbext-up.html
+│       ├── cocotbext-busbase.html
 │       ├── config
 │       │   ├── Comments.txt
 │       │   ├── Languages.txt
@@ -91,7 +87,7 @@
 ├── setup.cfg
 ├── setup.py
 └── tests
-    └── up_ad
+    └── busbase
         ├── Makefile
         ├── test.py
         └── test.v

@@ -1,1 +1,1 @@
-﻿NDSearch.OnPrefixDataLoaded("wqu",["Variable"],[["wqueue",,[["busbase",,,,0,"File3:busbase.py:busbase.wqueue","PythonClass:busbase:wqueue"]]]]);
+﻿NDSearch.OnPrefixDataLoaded("wqu",["Variable"],[["wqueue",,[["busbase",,,,0,"File:busbase.py:busbase.wqueue","PythonClass:busbase:wqueue"]]]]);

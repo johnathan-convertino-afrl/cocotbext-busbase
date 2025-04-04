@@ -1,7 +1,7 @@
 \begin{titlepage}
   \begin{center}
 
-  {\Huge cocotbext uP}
+  {\Huge cocotbext busbase}
 
   \vspace{25mm}
 
@@ -27,7 +27,7 @@
 \subsection{Introduction}
 
 \par
-Cocotb extension to test uP bus master, and slave devices.
+Cocotb extension to provide base of bus methods.
 
 \subsection{Dependencies}
 
@@ -42,18 +42,118 @@ The following are the dependencies of the cores.
 
 \subsection{In a Simulation}
 \par
-Below is a simple example for reading and writing data from register zero in the cocotb extension.
+Below is a simple example of creating a basic master for a bus using busmaster (see test.py for usable example).
 \begin{lstlisting}[language=Python]
+# Class: basictrans
+# create an object that associates a data member and address for operation.
+class basictrans(transaction):
+    def __init__(self, address, data=None):
+        self.address = address
+        self.data = data
 
-master  = upMaster(dut, "apb", dut.clk, dut.rstn)
-slave = upEchoSlave(dut, "apb", dut.clk, dut.rstn)
+# Class: basicMaster
+# basic bus master
+class basicMaster(busbase):
+  # Variable: _signals
+  # List of signals that are required
+  _signals = ["addr", "we", "cs", "data"]
 
-await master.write(0, 0xAAAAAAAA)
+  # Constructor: __init__
+  # Setup defaults and call base class constructor.
+  def __init__(self, entity, name, clock, reset, *args, **kwargs):
+    super().__init__(entity, name, clock, *args, **kwargs)
 
-rx_data = await master.read(0)
+    self.log.info("BASIC Master")
+    self.log.info("Copyright (c) 2025 Jay Convertino")
+    self.log.info("https://github.com/johnathan-convertino-afrl/cocotbext-busbase")
 
-assert 0xAAAAAAAA == rx_data, "RECEIVED DATA DOES NOT MATCH"
+    self._reset = reset
 
+    self.bus.addr.setimmediatevalue(0)
+    self.bus.data.setimmediatevalue(0)
+
+  # Function: read
+  # Read from a address and return data
+  async def read(self, address):
+    trans = None
+    if(isinstance(address, list)):
+      temp = []
+      for a in address:
+        temp.append(basictrans(a))
+      temp = await self.read_trans(temp)
+      #need a return with the data list only. This is only a guess at this point
+      return [temp[i].data for i in range(len(temp))]
+    else:
+      trans = await self.read_trans(basictrans(address))
+      return trans.data
+
+  # Function: write
+  # Write to a address some data
+  async def write(self, address, data):
+    if(isinstance(address, list) or isinstance(data, list)):
+      if(len(address) != len(data)):
+        self.log.error(f'Address and data vector must be the same length')
+      temp = []
+      for i in range(len(address)):
+        temp.append(basictrans(address[i], data[i]))
+      await self.write_trans(temp)
+    else:
+      await self.write_trans(basictrans(address, data))
+
+  # Function: _check_type
+  # Check and make sure we are only sending 2 bytes at a time and that it is a bytes/bytearray
+  def _check_type(self, trans):
+      if(not isinstance(trans, basictrans)):
+          self.log.error(f'Transaction must be of type: {type(basictrans)}')
+          return False
+
+      return True
+
+  # Method: _run
+  # _run thread that deals with read and write.
+  async def _run(self):
+    self.active = False
+
+    trans = None
+
+    while True:
+
+      if self._reset.value:
+        self.bus.we.setimmediatevalue(0)
+        self.bus.cs.setimmediatevalue(0)
+        await RisingEdge(self.clock)
+        continue
+
+      if not self.wqueue.empty():
+        self.active = True
+        while self.active:
+          trans = await self.wqueue.get()
+          self.bus.we.setimmediatevalue(1)
+          self.bus.cs.setimmediatevalue(1)
+          self.bus.addr.setimmediatevalue(trans.address)
+          self.bus.data.setimmediatevalue(trans.data)
+          self._idle_write.set()
+          await RisingEdge(self.clock)
+
+          self.active = not self.wqueue.empty()
+      elif not self.qqueue.empty():
+        self.active = True
+        while self.active:
+          trans = await self.qqueue.get()
+          self.bus.we.setimmediatevalue(0)
+          self.bus.cs.setimmediatevalue(1)
+          self.bus.addr.setimmediatevalue(trans.address)
+          trans.data = self.bus.data.value
+          await self.rqueue.put(trans)
+          self._idle_read.set()
+          await RisingEdge(self.clock)
+
+          self.active = not self.qqueue.empty()
+      else:
+        self.active = False
+        self.bus.we.setimmediatevalue(0)
+        self.bus.cs.setimmediatevalue(0)
+        await RisingEdge(self.clock)
 \end{lstlisting}
 
 \section{Architecture}
@@ -61,12 +161,11 @@ assert 0xAAAAAAAA == rx_data, "RECEIVED DATA DOES NOT MATCH"
 Please see \ref{Code Documentation} for more information.
 
 \par
-upMaster tests uP slave devices by executing read/write requests from the python test bench.
+busbase is the base class for busbase methods.
 \par
-upEchoSlave provides a simple slave that will echo all register writes back over read when requested.
+noSignal used if a signal does not exist, you can switch it out with this class and still use the value attribute.
 \par
-upMonitor tests to make sure signals are proper. Simple core at the moment, only checks for 0 at rest
-and if the wack/rack is correct per wreq/rreq.
+transaction is the base class for all transactions. This will contain items such as address/data for read/write.
 
 \subsection{Directory Guide}
 
@@ -80,7 +179,7 @@ Below highlights important folders from the root of the directory.
     \end{itemize}
   \item \textbf{cocotbext} Contains source files for the extension
     \begin{itemize}
-      \item \textbf{up.ad} Contains source files for the Analog Devices uP version of the bus.
+      \item \textbf{busbase} Contains source files for busbase
     \end{itemize}
   \item \textbf{tests} Contains test files for cocotb
 \end{enumerate}
@@ -114,9 +213,6 @@ Natural docs is used to generate documentation for this project. The next lists 
 
 \begin{itemize}
   \item \textbf{init} Python init code.\\
-  \item \textbf{monitor} Contains bus monitor code.\\
-  \item \textbf{driver} Contains bus driver code.\\
-  \item \textbf{absbus} Contains bus abstraction for monitor, and driver code.\\
   \item \textbf{busbase} Contains bus base for threads and read/write methods.\\
   \item \textbf{cocotb test} Python TestFactory code.\\
   \item \textbf{cocotb verilog test wrapper} Verilog wrapper module.\\
